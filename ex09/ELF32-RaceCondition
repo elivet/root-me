@@ -1,0 +1,4 @@
+./ch12
+ctrl C
+cd /tmp/
+cat tmp_file.txt
