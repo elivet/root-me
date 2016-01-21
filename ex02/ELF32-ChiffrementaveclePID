@@ -1,3 +1,6 @@
+## On ecrit un programme qui crypt son pid+1 avec la cle $1$awesome. On ecrit ensuite un script qui donne en argument a ch12 le pid+1 crypte de notre programme qui doit correspondre a ce que demande ch12
+
+
 cd /tmp
 mkdir lol
 cd lol 

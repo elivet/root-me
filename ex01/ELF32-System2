@@ -1,4 +1,6 @@
-cd tmp
+## On cree un fichier ls dans lequel on appel cat avec $2 pour ignorer -la, puis on rajoute /tmp/lol au PATH pour que le programme appelle le fichier ls qui contient le cat qui va afficher le mot de passe
+
+cd /tmp
 mkdir lol
 cd lol
 vim ls

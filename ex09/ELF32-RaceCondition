@@ -1,3 +1,5 @@
+## On exploite le usleep du programme avec un ctrl C. On interrompt donc le programme qui n'as  pas le temps de terminer de fermer le fichier
+
 ./ch12
 ctrl C
 cd /tmp/
