@@ -1,0 +1,79 @@
+##On cree un dossier temporaire dans tmp dans lequel on reprend tous les fichiers du programme.
+
+cd /tmp/
+mkdir yopla
+cd yopla
+
+##Pour le fichier global.h, on change NICK
+#define NICK    "ELIS"
+
+On trouve ladersse du buff
+puis on voit que handler list est stocke un peu apres, apres un certain nombre de handlers
+
+Avec notre overflow, on va vouloir reecrire sur ce nmbr de handlers et sur handler list
+
+un hndler correspond a une CMD
+
+on veut reecrire sur une CMD et le handler correspondant
+
+les handlers sont appele dans handle msg
+dans init_handler il y a la CMD 376.
+Cest celle quon va reecrire
+
+Les autres handlers pas modifier et qui seront appeles ne feront donc pas segfaulter la boucle et le prgm continuera
+
+On ne peut pas stocker notre overflow dans buf aui est trop petit
+On va donc le stocker dans la struct msg que lon apellera dans le buf
+
+next_param est appele dans privmsg_handle
+Le message doit commencer par ! et il faut utiliser une commmande reconnue par le bot
+
+
+
+##On veut segfault next_param
+
+
+##On veut ecraser handler_list
+
+
+
+
+
+
+
+
+
+
+mkdir /tmp/jm; cd /tmp/jm; cp ~/* .
+
+global.h :
+#define NICK    "Pown3dBot" => #define NICK    "JMB2"
+
+fonction qui peuvent segfault :
+	- next_param
+		- get_nick
+
+		nm ch31
+			[...]
+				0804b120 b buff.4746
+					[...]
+
+					gdb ch31
+						x/100xw 0x0804b120
+
+							0x804b140 <buff.4746+32>:	0x00000000	0x00000000	0x00000000	0x00000000
+								0x804b150:	0x00000000	0x00000000	0x00000000	0x00000000
+									0x804b160 <Handler_List>:	0x00000000	0x00000000	0x00000000	0x00000000
+									Je vais donc ecraser Handler_List
+										struct Handler Handler_List[MAX_HANDLER];
+											void init_handlers(void)
+												{
+															add_handler("376", end_list_handle);
+																	add_handler("JOIN", join_handle);
+																			add_handler("PRIVMSG", privmsg_handle);
+																					add_handler("PING", ping_handle);
+																						}
+
+																						nc -lvp 9999
+																						./rootroot.py
+																						cd challenge/app-systeme/ch31/; cat .passwd;
